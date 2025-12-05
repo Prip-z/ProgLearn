@@ -1,0 +1,19 @@
+---
+const { chapters } = Astro.props;
+---
+
+{Array.isArray(chapters) && chapters.length > 0 ? (
+  chapters.map(chapter => (
+    <details class="chapter">
+      <summary>{chapter.title}</summary>
+
+      <ul class="chapter-items">
+        {chapter.posts?.map(post => (
+          <li><a href={post.url}>{post.title}</a></li>
+        ))}
+      </ul>
+    </details>
+  ))
+) : (
+  <p>Нет данных</p>
+)}

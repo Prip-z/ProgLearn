@@ -1,0 +1,21 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+const { pageTitle } = Astro.props;
+---
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="base">
+    <Header />
+
+    <main class="centered">
+      <h1>{pageTitle}</h1>
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

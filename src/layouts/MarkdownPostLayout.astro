@@ -1,0 +1,64 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SideMenu from '../components/SideMenu.astro';
+
+const { frontmatter } = Astro.props;
+
+const section = frontmatter.section;
+
+
+let postFiles = {};
+let metaFiles = {};
+
+if (section === "csharp") {
+  postFiles = import.meta.glob('../pages/posts/csharp/**/*.md', { eager: true });
+  metaFiles = import.meta.glob('../pages/posts/csharp/*/meta.json', { eager: true });
+} else if (section === "python") {
+  postFiles = import.meta.glob('../pages/posts/python/**/*.md', { eager: true });
+  metaFiles = import.meta.glob('../pages/posts/python/*/meta.json', { eager: true });
+} else if (section === "web") {
+  postFiles = import.meta.glob('../pages/posts/web/**/*.md', { eager: true });
+  metaFiles = import.meta.glob('../pages/posts/web/*/meta.json', { eager: true });
+}
+
+
+const chapters = Object.entries(metaFiles)
+  .map(([path, mod]) => {
+    const meta = (mod as any).default ?? mod;
+    const folder = path.split('/').at(-2);
+
+    return {
+      folder,
+      title: meta.title,
+      order: Number(meta.order) || 0,
+      posts: []
+    };
+  })
+  .sort((a, b) => a.order - b.order);
+
+for (const [path, raw] of Object.entries(postFiles)) {
+  const mod = raw as any;
+  const chapterName = path.split('/').at(-2);
+
+  const chapter = chapters.find(c => c.folder === chapterName);
+  if (!chapter) continue;
+
+  chapter.posts.push({
+    url: mod.url,
+    title: mod.frontmatter.title
+  });
+}
+---
+
+<BaseLayout pageTitle={frontmatter.title}>
+  <div slot="left">
+    <SideMenu chapters={chapters} />
+  </div>
+
+  <p>{frontmatter.pubDate.toString().slice(0,10)}</p>
+  <p><em>{frontmatter.description}</em></p>
+
+  <div class="post-content">
+    <slot />
+  </div>
+</BaseLayout>

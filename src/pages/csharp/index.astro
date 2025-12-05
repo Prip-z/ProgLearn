@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SideMenu from '../../components/SideMenu.astro';
+
+const chapterMetaFiles = import.meta.glob('../posts/csharp/*/meta.json', { eager: true });
+
+const chapters = Object.entries(chapterMetaFiles)
+  .map(([path, mod]) => {
+    const meta = (mod as any).default ?? mod;
+    const folder = path.split('/').at(-2);
+
+    return {
+      folder,
+      title: meta.title,
+      order: Number(meta.order) || 0,
+      posts: []
+    };
+  })
+  .sort((a, b) => a.order - b.order);
+
+const postFiles = import.meta.glob('../posts/csharp/**/*.md', { eager: true });
+
+for (const [path, raw] of Object.entries(postFiles)) {
+  const mod = raw as any;
+  const chapterName = path.split('/').at(-2);
+
+  const chapter = chapters.find(c => c.folder === chapterName);
+  if (!chapter) continue;
+
+  chapter.posts.push({
+    url: mod.url,
+    title: mod.frontmatter.title
+  });
+}
+---
+
+<BaseLayout pageTitle="C#">
+  <div slot="left">
+    <SideMenu chapters={chapters} />
+  </div>
+
+  <h2>C#</h2>
+
+  <p>C# — строгий, типобезопасный и довольно упрямый язык, который заставляет держать голову включённой. 
+  Раздел собирает материалы по синтаксису, базовым конструкциям, работе с типами, объектной модели и всему, 
+  что нужно, чтобы писать на нём не только учебные «Hello World», но и реальные проекты.</p>
+
+  <p>Здесь постепенно будет раскрываться фундамент платформы .NET, особенности исполнения кода, базовые паттерны 
+  и нюансы, которые обычно узнают после пары ошибок и одного нервного тика.</p>
+
+  <p>Материал будет пополняться по мере движения вперёд.</p>
+</BaseLayout>
